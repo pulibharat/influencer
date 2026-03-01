@@ -1,28 +1,40 @@
 import { useState } from 'react';
 import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { Home, Users, Bell, MessageSquare, UserCircle, Settings, LogOut, Search, Menu, X, ChevronDown } from 'lucide-react';
+import { Home, Users, Bell, MessageSquare, UserCircle, Settings, LogOut, Search, Menu, X, ChevronDown, Cpu, Bot, Shield, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { sampleNotifications } from '@/data/mockData';
+import { FloatingChatBot } from '@/components/dashboard/FloatingChatBot';
 import { motion, AnimatePresence } from 'framer-motion';
-
-const menuItems = [
-  { icon: Home, label: 'Home', path: '/dashboard' },
-  { icon: Users, label: 'Influencers', path: '/dashboard/influencers' },
-  { icon: Bell, label: 'Notifications', path: '/dashboard/notifications' },
-  { icon: MessageSquare, label: 'Messages', path: '/dashboard/messages' },
-  { icon: UserCircle, label: 'Profile', path: '/dashboard/profile' },
-  { icon: Settings, label: 'Settings', path: '/dashboard/settings' },
-];
+import { useTheme } from '@/contexts/ThemeContext';
 
 export function DashboardLayout() {
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+
+  const menuItems = [
+    { icon: Home, label: 'Home', path: '/dashboard' },
+    ...(user?.role === 'client' ? [
+      { icon: Search, label: 'Discover', path: '/dashboard/influencers' },
+      { icon: Cpu, label: 'AI Matching', path: '/dashboard/ai-matching' },
+      { icon: Bot, label: 'AI Assistant', path: '/dashboard/ai-assistant' },
+    ] : user?.role === 'influencer' ? [
+      { icon: Bell, label: 'Manage Requests', path: '/dashboard/requests' },
+      { icon: Users, label: 'My Bookings', path: '/dashboard/bookings' },
+    ] : [
+      { icon: Shield, label: 'Admin Panel', path: '/dashboard/admin' },
+    ]),
+    { icon: MessageSquare, label: 'Messages', path: '/dashboard/messages' },
+    { icon: Bell, label: 'Notifications', path: '/dashboard/notifications' },
+    { icon: UserCircle, label: 'Profile', path: '/dashboard/profile' },
+    { icon: Settings, label: 'Settings', path: '/dashboard/settings' },
+  ];
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileDropdown, setProfileDropdown] = useState(false);
   const [notifDropdown, setNotifDropdown] = useState(false);
+  const { theme, setTheme } = useTheme();
   const unreadNotifs = sampleNotifications.filter(n => !n.read).length;
 
   const handleLogout = () => { logout(); navigate('/'); };
@@ -33,13 +45,12 @@ export function DashboardLayout() {
       <aside className={`fixed inset-y-0 left-0 z-40 w-72 bg-sidebar transform transition-all duration-500 lg:translate-x-0 ${sidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}`}>
         <div className="flex flex-col h-full">
           <div className="flex items-center gap-3 h-20 px-8 border-b border-sidebar-border/50">
-            <motion.div 
-              whileHover={{ rotate: 5, scale: 1.05 }}
-              className="w-10 h-10 rounded-xl gradient-bg flex items-center justify-center shadow-lg shadow-primary/20"
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              className="flex items-center gap-2"
             >
-              <span className="text-white font-bold text-base">IM</span>
+              <img src="/whisk_udaan_setu.png" alt="Whisk Udaan Setu" className="h-12 w-12 rounded-full object-cover border-2 border-white/20" />
             </motion.div>
-            <span className="font-display text-xl font-bold text-white tracking-tight">InfluMatch</span>
             <button className="lg:hidden ml-auto text-white/70 hover:text-white transition-colors" onClick={() => setSidebarOpen(false)}>
               <X className="w-6 h-6" />
             </button>
@@ -85,12 +96,12 @@ export function DashboardLayout() {
       {/* Overlay */}
       <AnimatePresence>
         {sidebarOpen && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-30 bg-black/40 backdrop-blur-sm lg:hidden" 
-            onClick={() => setSidebarOpen(false)} 
+            className="fixed inset-0 z-30 bg-black/40 backdrop-blur-sm lg:hidden"
+            onClick={() => setSidebarOpen(false)}
           />
         )}
       </AnimatePresence>
@@ -105,18 +116,30 @@ export function DashboardLayout() {
             </button>
             <div className="relative max-w-md w-full hidden sm:block group">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-              <Input 
-                placeholder="Search influencers, campaigns..." 
-                className="pl-12 h-11 w-full bg-gray-50/50 dark:bg-muted/20 border-gray-200/50 dark:border-border/50 focus:bg-white dark:focus:bg-card rounded-xl transition-all shadow-sm focus:shadow-md outline-none" 
+              <Input
+                placeholder="Search influencers, campaigns..."
+                className="pl-12 h-11 w-full bg-gray-50/50 dark:bg-muted/20 border-gray-200/50 dark:border-border/50 focus:bg-white dark:focus:bg-card rounded-xl transition-all shadow-sm focus:shadow-md outline-none"
               />
             </div>
           </div>
 
           <div className="flex items-center gap-5">
+            {/* Theme Toggle */}
+            <button
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              className="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-muted text-muted-foreground hover:text-foreground transition-all duration-300 group"
+            >
+              {theme === 'dark' ? (
+                <Sun className="w-5.5 h-5.5 group-hover:rotate-45 transition-transform" />
+              ) : (
+                <Moon className="w-5.5 h-5.5 group-hover:-rotate-12 transition-transform" />
+              )}
+            </button>
+
             {/* Notifications */}
             <div className="relative">
-              <button 
-                onClick={() => { setNotifDropdown(!notifDropdown); setProfileDropdown(false); }} 
+              <button
+                onClick={() => { setNotifDropdown(!notifDropdown); setProfileDropdown(false); }}
                 className={`relative p-2.5 rounded-xl transition-all duration-300 ${notifDropdown ? 'bg-primary/10 text-primary' : 'hover:bg-gray-100 dark:hover:bg-muted text-muted-foreground hover:text-foreground'}`}
               >
                 <Bell className="w-5.5 h-5.5" />
@@ -124,10 +147,10 @@ export function DashboardLayout() {
                   <span className="absolute top-2 right-2 w-2 h-2 bg-destructive rounded-full ring-2 ring-white dark:ring-card" />
                 )}
               </button>
-              
+
               <AnimatePresence>
                 {notifDropdown && (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
@@ -156,8 +179,8 @@ export function DashboardLayout() {
 
             {/* Profile */}
             <div className="relative">
-              <button 
-                onClick={() => { setProfileDropdown(!profileDropdown); setNotifDropdown(false); }} 
+              <button
+                onClick={() => { setProfileDropdown(!profileDropdown); setNotifDropdown(false); }}
                 className={`flex items-center gap-3 p-1.5 pr-3 rounded-xl transition-all duration-300 ${profileDropdown ? 'bg-gray-100 dark:bg-muted' : 'hover:bg-gray-50 dark:hover:bg-muted'}`}
               >
                 <div className="relative">
@@ -170,10 +193,10 @@ export function DashboardLayout() {
                 </div>
                 <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-300 ${profileDropdown ? 'rotate-180' : ''}`} />
               </button>
-              
+
               <AnimatePresence>
                 {profileDropdown && (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
@@ -201,6 +224,7 @@ export function DashboardLayout() {
           <Outlet />
         </main>
       </div>
+      <FloatingChatBot />
     </div>
   );
 }

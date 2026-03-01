@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { DashboardLayout } from "./components/dashboard/DashboardLayout";
@@ -14,6 +15,10 @@ import MessagesPage from "./pages/MessagesPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
+import AIMatchingPage from "./pages/AIMatchingPage";
+import AIAssistantPage from "./pages/AIAssistantPage";
+import RequestsPage from "./pages/RequestsPage";
+import BookingsPage from "./pages/BookingsPage";
 import { AuthModal } from "./components/auth/AuthModal";
 
 const queryClient = new QueryClient();
@@ -33,8 +38,13 @@ function AppRoutes() {
           <Route index element={<DashboardHome />} />
           <Route path="influencers" element={<InfluencersPage />} />
           <Route path="influencer/:id" element={<InfluencerProfile />} />
+          <Route path="ai-matching" element={<AIMatchingPage />} />
+          <Route path="ai-assistant" element={<AIAssistantPage />} />
           <Route path="messages" element={<MessagesPage />} />
           <Route path="notifications" element={<NotificationsPage />} />
+          <Route path="requests" element={<RequestsPage />} />
+          <Route path="bookings" element={<BookingsPage />} />
+          <Route path="admin" element={<div className="p-20 text-center"><h1 className="text-4xl font-display font-bold mb-4">Admin Command Center</h1><p className="text-muted-foreground">Authorized personnel only. This feature is currently in production.</p></div>} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="settings" element={<SettingsPage />} />
         </Route>
@@ -47,15 +57,17 @@ function AppRoutes() {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <AppRoutes />
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
+    <ThemeProvider defaultTheme="dark" storageKey="influencematch-theme">
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <AppRoutes />
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
